@@ -1,12 +1,36 @@
 node_modules
 dist
 dist-ssr
+.cache
+coverage
+
+# Env / secrets
 .env
-.env.local
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+
+# Logs and build cache
 *.log
 *.tsbuildinfo
+
+# OS metadata
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editor / IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
+*.swp
+*.swo
+*~
+
+# Tool / agent local state
 .claude/
+
