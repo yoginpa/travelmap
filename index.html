@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Travel Map</title>
+    <!-- Pre-warm DNS + TLS for the geocoding APIs so the first search isn't blocked on a cold handshake. -->
+    <link rel="preconnect" href="https://photon.komoot.io" crossorigin />
+    <link rel="dns-prefetch" href="https://photon.komoot.io" />
+    <link rel="preconnect" href="https://overpass-api.de" crossorigin />
+    <link rel="dns-prefetch" href="https://overpass-api.de" />
+    <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
+    <link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin />
+    <link rel="preconnect" href="https://c.basemaps.cartocdn.com" crossorigin />
+  </head>
+  <body class="bg-black">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
