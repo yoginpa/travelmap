@@ -33,6 +33,9 @@ interface Actions {
   deleteSegment: (id: string) => Promise<void>
 
   setCurrentTime: (ms: number) => void
+
+  replaceAll: (data: { trips: Trip[]; segments: Segment[] }) => Promise<void>
+  mergeImport: (data: { trips: Trip[]; segments: Segment[] }) => Promise<void>
 }
 
 export type TripStore = State & Actions
@@ -152,6 +155,50 @@ export const useTripStore = create<TripStore>((set, get) => ({
   },
 
   setCurrentTime: (ms) => set({ currentTimeMs: ms }),
+
+  replaceAll: async ({ trips, segments }) => {
+    await db.transaction('rw', db.trips, db.segments, async () => {
+      await db.trips.clear()
+      await db.segments.clear()
+      if (trips.length) await db.trips.bulkAdd(trips)
+      if (segments.length) await db.segments.bulkAdd(segments)
+    })
+    const sortedTrips = [...trips].sort((a, b) => a.startDate.localeCompare(b.startDate))
+    const sortedSegments = [...segments].sort((a, b) => a.startUtc.localeCompare(b.startUtc))
+    const activeTrip = sortedTrips[0] ?? null
+    set({
+      trips: sortedTrips,
+      segments: sortedSegments,
+      activeTripId: activeTrip?.id ?? null,
+      currentTimeMs: activeTrip ? defaultTimeForTrip(activeTrip, sortedSegments) : 0,
+    })
+  },
+
+  mergeImport: async ({ trips, segments }) => {
+    // Imported records win on ID conflict (assumption: user is bringing newer data in).
+    await db.transaction('rw', db.trips, db.segments, async () => {
+      if (trips.length) await db.trips.bulkPut(trips)
+      if (segments.length) await db.segments.bulkPut(segments)
+    })
+    const [allTrips, allSegments] = await Promise.all([
+      db.trips.toArray(),
+      db.segments.toArray(),
+    ])
+    allTrips.sort((a, b) => a.startDate.localeCompare(b.startDate))
+    allSegments.sort((a, b) => a.startUtc.localeCompare(b.startUtc))
+    const state = get()
+    const activeTripId =
+      state.activeTripId && allTrips.some((t) => t.id === state.activeTripId)
+        ? state.activeTripId
+        : (allTrips[0]?.id ?? null)
+    const activeTrip = activeTripId ? allTrips.find((t) => t.id === activeTripId) ?? null : null
+    set({
+      trips: allTrips,
+      segments: allSegments,
+      activeTripId,
+      currentTimeMs: activeTrip ? defaultTimeForTrip(activeTrip, allSegments) : 0,
+    })
+  },
 }))
 
 export const selectActiveTrip = (s: TripStore): Trip | null =>

@@ -11,6 +11,7 @@ import { TripPicker } from './TripPicker'
 import { SegmentList } from './SegmentList'
 import { SegmentForm } from './SegmentForm'
 import { NearbyPanel } from './NearbyPanel'
+import { DataMenu } from './DataMenu'
 
 export function Sidebar() {
   const trips = useTripStore((s) => s.trips)
@@ -46,7 +47,10 @@ export function Sidebar() {
   return (
     <aside className="absolute top-0 left-0 z-10 flex h-full w-80 flex-col border-r border-white/10 bg-zinc-950/85 text-white backdrop-blur">
       <div className="border-b border-white/10 px-4 py-3">
-        <div className="text-sm font-medium">Travel Map</div>
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium">Travel Map</div>
+          <DataMenu />
+        </div>
         <div className="mt-2">
           <TripPicker activeTrip={activeTrip} trips={trips} />
         </div>
